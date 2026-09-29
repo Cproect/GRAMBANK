@@ -1,19 +1,16 @@
-# GRAM bank — Telegram Mini App
+# GRAM Bank — демо Telegram Mini App
 
-Статическое приложение: HTML + CSS + Vanilla JS. Без backend, данные — в LocalStorage.
+Статический прототип: HTML, CSS, Vanilla JS (ES-модули), LocalStorage. Без backend. Все операции и курсы — демонстрационные.
 
-## Деплой на GitHub Pages
-1. Залейте файлы в репозиторий (index.html в корне).
+## Публикация
+1. Загрузите содержимое папки в корень репозитория GitHub.
 2. Settings → Pages → Deploy from branch → `main` / root.
-3. В @BotFather: `/newapp` (или Menu Button) → укажите URL `https://<user>.github.io/<repo>/`.
+3. В @BotFather: `/newapp` (или Menu Button) → URL `https://<user>.github.io/<repo>/`.
 
-## Настройки
-Все константы (курсы, минимум, ставки, список залогов) — `CONFIG` в `js/state.js`.
+## Настройка
+Все курсы, ставки, страховка, лимиты, залоги и активы — в `js/config.js`.
 
 ## Структура
-- `telegram.js` — Telegram Web App API (MainButton, BackButton, haptic)
-- `storage.js` — единственный доступ к LocalStorage
-- `state.js` — состояние, кредиты, расчёты залога
-- `rates.js` — курсы и случайная история для графиков
-- `router.js` — переключение страниц
-- `pages/`, `components/` — страницы и UI
+`js/telegram.js` — Telegram Web App API · `js/storage.js` — LocalStorage · `js/state.js` — состояние · `js/router.js` — hash-навигация · `js/calc.js` — расчёты и демо-история цен · `js/pages/` — экраны · `js/components/` — компоненты.
+
+Локальный запуск: `python3 -m http.server` (ES-модули не работают с `file://`).
