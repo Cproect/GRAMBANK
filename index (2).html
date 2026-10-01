@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>GRAM Bank</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#141414;--c1:#1f1f1f;--c2:#2b2b2b;--t:#fff;--m:#8e8e93;--y:#ffdd2d;--yt:#333;--l:#333;--err:#ff5c5c;--ok:#3fd18a}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--t);font:15px/1.4 -apple-system,"SF Pro Text",Roboto,"Segoe UI",Arial,sans-serif}
+body{padding-top:env(safe-area-inset-top,0px)}
+button,input,select{font:inherit;color:inherit;border:0;background:none;outline:0}
+button{cursor:pointer}
+small{color:var(--m);font-size:12px}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(20,20,20,.88);backdrop-filter:blur(14px)}
+.logo{width:36px;height:36px;border-radius:50%;background:var(--y);color:var(--yt);display:grid;place-items:center;font-weight:800;font-size:18px}
+.top b{display:block;line-height:1.1}
+.tag{margin-left:auto;font-size:11px;color:var(--m);background:var(--c1);border-radius:99px;padding:4px 10px}
+main{max-width:520px;margin:0 auto;padding:6px 16px calc(100px + env(safe-area-inset-bottom,0px))}
+h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:8px 0 16px}
+h2{font-size:17px;font-weight:700;margin-bottom:12px}
+.view,.step[hidden]{display:none}.view.on{display:block}
+.card{background:var(--c1);border-radius:20px;padding:18px;margin-bottom:12px;animation:up .45s cubic-bezier(.2,.8,.2,1) both}
+.card:nth-child(n+3){animation-delay:.05s}.card:nth-child(n+5){animation-delay:.1s}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hint{font-size:13px;color:var(--m);margin-top:10px}
+.rowb{display:flex;justify-content:space-between;align-items:center}
+label{display:block;font-size:13px;color:var(--m)}
+.seg{display:flex;background:var(--c2);border-radius:14px;padding:3px;margin-bottom:16px}
+.seg button{flex:1;padding:9px 4px;border-radius:11px;font-size:14px;font-weight:600;color:var(--m);transition:all .25s}
+.seg button.on{background:var(--y);color:var(--yt)}
+.big{display:flex;align-items:baseline;gap:8px;margin:4px 0}
+.big input{width:100%;min-width:0;font-size:38px;font-weight:800;letter-spacing:-.02em}
+.big span{color:var(--m);font-weight:700;white-space:nowrap}
+.msg{font-size:13px;color:var(--m);min-height:19px;transition:color .2s}.msg.bad{color:var(--err)}.msg.good{color:var(--ok)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
+.chip{background:var(--c2);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:600;transition:transform .12s}
+.chip:active{transform:scale(.93)}
+input[type=range]{width:100%;accent-color:var(--y);height:28px}
+.total{font-size:34px;font-weight:800;letter-spacing:-.02em;color:var(--y);margin:2px 0 8px}
+.rows>div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--l)}
+.rows dt{color:var(--m)}.rows dd{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ladder div{background:var(--c2);border-radius:14px;padding:10px 4px;text-align:center;transition:all .25s}
+.ladder div.on{background:var(--y);color:var(--yt)}.ladder div.on small{color:var(--yt)}
+.ladder small{display:block}
+.sch>div{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:8px 0;border-top:1px solid var(--l);font-variant-numeric:tabular-nums;font-size:14px}
+.sch small{min-width:100px;text-align:right}
+.btn{position:relative;overflow:hidden;width:100%;background:var(--y);color:var(--yt);font-weight:700;font-size:17px;padding:16px;border-radius:16px;transition:transform .12s,opacity .25s}
+.btn:active{transform:scale(.98)}.btn:disabled{opacity:.3}
+.btn:not(:disabled):not(.alt)::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.4) 50%,transparent 70%);transform:translateX(-100%);animation:sh 3.5s infinite}
+@keyframes sh{to{transform:translateX(100%)}}
+.btn.alt{background:var(--c2);color:var(--t);margin-top:8px}
+.back{color:var(--y);font-weight:600;padding:6px 0}
+.opt{display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--c1);border-radius:16px;padding:16px;margin-bottom:8px;text-align:left;box-shadow:inset 0 0 0 2px transparent;transition:all .25s}
+.opt:active{transform:scale(.985)}.opt.on{box-shadow:inset 0 0 0 2px var(--y);background:#262410}
+.opt b{display:block}.opt i{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--m);transition:all .25s}
+.opt.on i{box-shadow:inset 0 0 0 6px var(--y)}
+.terms{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.term{background:var(--c1);border-radius:18px;padding:14px;animation:up .45s both}
+.term small{display:block;margin-bottom:6px}.term b{font-size:15px}
+select{background:var(--c2);border-radius:12px;padding:11px 10px;font-weight:600;appearance:none;text-align:center;min-width:104px}
+select option{background:#2b2b2b;color:#fff}
+.cx{display:flex;gap:8px;align-items:center}
+.cx input{flex:1;min-width:0;background:var(--c2);border-radius:12px;padding:11px 12px;font-size:20px;font-weight:700}
+.res{font-size:20px;font-weight:700;flex:1;padding:11px 12px;border-radius:12px;background:var(--bg);overflow-wrap:anywhere}
+.swap{display:block;margin:8px auto;width:38px;height:38px;border-radius:50%;background:var(--y);color:var(--yt);font-size:18px;font-weight:700;transition:transform .35s}
+.badge{font-size:11px;font-weight:700;background:var(--y);color:var(--yt);border-radius:99px;padding:3px 10px}
+.chart svg{display:block;width:100%;height:120px}
+.chart .line{fill:none;stroke:var(--y);stroke-width:2.2;stroke-linejoin:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1s ease forwards}
+.chart .area{fill:rgba(255,221,45,.08)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.ch-h{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ch-v{font-size:22px;font-weight:800}.up{color:var(--ok)}.dn{color:var(--err)}
+.mm{display:flex;justify-content:space-between;font-size:12px;color:var(--m);margin-top:6px}
+.per{display:flex;gap:6px;margin-top:10px}
+.per button{flex:1;padding:7px 0;border-radius:10px;background:var(--c2);font-size:13px;font-weight:600;color:var(--m);transition:all .2s}
+.per button.on{background:var(--y);color:var(--yt)}
+.note{font-size:12px;color:var(--m);text-align:center;margin-top:10px}
+.done{text-align:center;padding:30px 18px}
+.chk{width:56px;height:56px;border-radius:50%;background:var(--y);color:var(--yt);font-size:28px;font-weight:800;display:grid;place-items:center;margin:0 auto 14px;animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:none}}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;background:rgba(31,31,31,.92);backdrop-filter:blur(16px);border-radius:22px 22px 0 0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:600;color:var(--m);transition:color .2s,transform .12s}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+.tab:active{transform:scale(.94)}.tab.on{color:var(--y)}.tab.on svg{transform:translateY(-2px) scale(1.1)}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:20}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.chart .line{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="logo">G</div><div><b>GRAM Bank</b><small id="who">Демо-режим</small></div><span class="tag">Демо-прототип</span></header>
+<main>
+<section id="v-credit" class="view on">
+ <div id="s1" class="step">
+  <h1>Взять кредит</h1>
+  <div class="card">
+   <div class="seg" id="cur"><button data-c="GRAM" class="on">GRAM</button><button data-c="PRGRAM">PR GRAM</button></div>
+   <label for="amt">Сумма кредита</label>
+   <div class="big"><input id="amt" inputmode="numeric" placeholder="0" autocomplete="off"><span id="cu">GRAM</span></div>
+   <p class="msg" id="msg"></p>
+   <div class="chips" id="chips"></div>
+   <div class="seg" id="mode"><button data-m="lump" class="on">Сразу</button><button data-m="inst">Рассрочка до 14 дн.</button></div>
+   <div class="rowb"><label id="dl">Срок</label><b id="dv">7 дн.</b></div>
+   <input id="days" type="range" min="1" max="30" value="7">
+  </div>
+  <div class="card">
+   <small>К возврату</small><div class="total" id="tot">—</div><small id="tot2"></small>
+   <dl class="rows" id="rows"></dl>
+  </div>
+  <div class="card" id="schc" hidden><h2>График платежей</h2><div class="sch" id="sch"></div></div>
+  <div class="card"><h2>Как растёт ставка</h2><div class="ladder" id="lad"></div></div>
+  <button class="btn" id="go">Продолжить</button>
+ </div>
+ <div id="s2" class="step" hidden>
+  <button class="back" id="back">← Назад</button>
+  <h1>Выберите залог</h1>
+  <div id="opts"></div>
+  <div class="card" id="pl" hidden>
+   <small>Необходимый залог (кредит + запас)</small><div class="total" id="ptot">—</div>
+   <dl class="rows" id="prow"></dl>
+   <p class="hint" id="prate"></p>
+  </div>
+  <div class="card"><dl class="rows" style="margin-top:-10px"><div style="border:0"><dt>Номер операции</dt><dd id="opn">0</dd></div><div><dt>ID пользователя</dt><dd id="uid">—</dd></div></dl></div>
+  <button class="btn" id="ok" disabled>Подтвердить кредит</button>
+ </div>
+ <div id="s3" class="step" hidden>
+  <div class="card done">
+   <div class="chk">✓</div><h2>Заявка подготовлена</h2>
+   <p class="hint">Открылся чат с @Grammbank1 с готовым текстом. Нажмите «Отправить» в Telegram, чтобы заявка ушла.</p>
+   <button class="btn" id="again" style="margin-top:18px">Открыть чат ещё раз</button>
+   <button class="btn alt" id="fin">Готово</button>
+  </div>
+ </div>
+</section>
+
+<section id="v-terms" class="view">
+ <h1>Условия</h1><p class="hint" style="margin:-8px 0 14px">Все значения — условия демонстрационного прототипа.</p>
+ <div class="terms" id="terms"></div>
+ <div class="card"><p class="hint" style="margin:0">GRAM Bank — игровой сервис. Реальные деньги не принимаются и не выдаются, а GRAM, PR GRAM, RDNO — виртуальные единицы. Администрация не несёт ответственности за игровые активы. Информация не является финансовой рекомендацией.</p></div>
+</section>
+
+<section id="v-invest" class="view">
+ <h1>Инвестиции</h1>
+ <div class="card">
+  <h2>Калькулятор обмена</h2>
+  <div class="cx"><input id="cv" inputmode="decimal" value="1000"><select id="cf"></select></div>
+  <button class="swap" id="cs">⇅</button>
+  <div class="cx"><div class="res" id="cr">—</div><select id="ct"></select></div>
+  <p class="hint" id="cn"></p>
+ </div>
+ <div class="card"><h2>Курсы к GRAM</h2><dl class="rows" id="rates" style="margin-top:-10px"></dl></div>
+ <div class="card">
+  <div class="rowb" style="margin-bottom:12px"><h2 style="margin:0">Акции GRAMBANK</h2><span class="badge">В разработке</span></div>
+  <p class="hint" style="margin:-4px 0 12px" id="shp"></p>
+  <div class="chart" data-k="shares"></div>
+  <button class="btn alt" disabled style="margin-top:14px;opacity:.5">Покупка пока недоступна</button>
+ </div>
+ <div class="card"><div class="chart" data-k="gram"></div></div>
+ <div class="card"><div class="chart" data-k="pr"></div></div>
+</section>
+</main>
+
+<nav class="tabs">
+ <button class="tab on" data-v="credit"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Кредит</button>
+ <button class="tab" data-v="terms"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Условия</button>
+ <button class="tab" data-v="invest"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Инвестиции</button>
+</nav>
+<div id="toast"></div>
+
+<script>
+(()=>{
+/* ============ АДМИН-МОДУЛЬ: меняйте значения только здесь ============ */
+const ADMIN={
+  // Цена 1 единицы в GRAM. Из этой таблицы считаются ВСЕ пары, залог, калькулятор и графики.
+  value:{GRAM:1, PRGRAM:0.35, RDNO:0.1, STAR:2300, USDT:230000, USD:230000},
+  // Акция GRAMBANK: price — цена в GRAM; growthPerYear — прогноз роста, % в год; volatility — разброс, % в день
+  share:{price:5000, growthPerYear:70, volatility:1.2},
+  // Волатильность графиков курсов, % в день
+  vol:{GRAM:1.2, PRGRAM:5},
+  // Кредит: ставка в 1-й день, прибавка в день (оба в %), запас залога %, рассрочка
+  credit:{min:7000, max:10000000, maxDays:30, startRate:3.5, rateStep:1, margin:15, instMaxDays:14, instFee:3},
+  support:'Grammbank1' // куда уходит заявка
+};
+/* ===================================================================== */
+const A=ADMIN,V=A.value,C=A.credit;
+const L={GRAM:'GRAM',PRGRAM:'PR GRAM',RDNO:'RDNO',STAR:'Star',USDT:'USDT',USD:'USD'};
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const nf=(n,d=2)=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:d}).format(n);
+const fmt=n=>{const a=Math.abs(n);return nf(n,a>=100?2:a>=1?3:a>=0.01?4:8)};
+const tg=window.Telegram&&window.Telegram.WebApp;
+if(tg){try{tg.ready();tg.expand();tg.setHeaderColor('#141414');tg.setBackgroundColor('#141414')}catch(e){}}
+const user=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
+const uidText=user?user.id+(user.username?' (@'+user.username+')':''):'вне Telegram';
+$('#who').textContent=user?'ID '+user.id:'Демо-режим';$('#uid').textContent=uidText;
+
+/* счётчик операций: 0 для первого кредита, затем +1 (CloudStorage Telegram + localStorage) */
+const cs=tg&&tg.isVersionAtLeast&&tg.isVersionAtLeast('6.9')?tg.CloudStorage:null;
+let opNo=0;try{opNo=+localStorage.getItem('gb_op')||0}catch(e){}
+if(cs)try{cs.getItem('gb_op',(e,v)=>{if(!e&&v){opNo=Math.max(opNo,+v||0);$('#opn').textContent=opNo}})}catch(e){}
+const saveOp=n=>{opNo=n;try{localStorage.setItem('gb_op',n)}catch(e){}if(cs)try{cs.setItem('gb_op',String(n),()=>{})}catch(e){}};
+
+let tt;const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2200)};
+function count(el,to,f){const from=+el.dataset.v||0;el.dataset.v=to;const t0=performance.now();(function s(t){const k=Math.min(1,(t-t0)/450),e=1-Math.pow(1-k,3);el.textContent=f(from+(to-from)*e);if(k<1)requestAnimationFrame(s)})(t0)}
+
+/* навигация */
+$$('.tab').forEach(b=>b.onclick=()=>{$$('.tab').forEach(t=>t.classList.toggle('on',t===b));$$('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));scrollTo(0,0)});
+
+/* ---------- кредит ---------- */
+const s={cur:'GRAM',amt:0,days:7,mode:'lump',col:null,link:''};
+const gram=()=>s.amt*V[s.cur];
+const minCur=()=>s.cur==='GRAM'?C.min:Math.ceil(C.min/V[s.cur]-1e-9);
+const valid=()=>gram()>=C.min-1e-6&&gram()<=C.max;
+const rateFor=d=>C.startRate+C.rateStep*(d-1);
+const m=g=>fmt(g/V[s.cur])+' '+L[s.cur];
+const inp=$('#amt');
+
+function check(showEmpty){
+  const g=gram();let t='Минимум — '+nf(minCur())+' '+L[s.cur]+(s.cur!=='GRAM'?' ('+nf(C.min)+' GRAM)':''),c='';
+  if(!s.amt){c=showEmpty?'bad':''}
+  else if(g<C.min-1e-6)c='bad';
+  else if(g>C.max){c='bad';t='Максимум для демо — '+nf(C.max/V[s.cur],0)+' '+L[s.cur]}
+  else{t='Сумма подходит';c='good'}
+  $('#msg').textContent=t;$('#msg').className='msg '+c;return valid();
+}
+function repay(){
+  const g=gram(),rate=rateFor(s.days),acc=g*rate/100,base=g+acc;
+  if(s.mode!=='inst')return{g,rate,acc,total:base,daily:base,fee:0};
+  const daily=base/s.days*(1+C.instFee/100);
+  return{g,rate,acc,total:daily*s.days,daily,fee:daily*s.days-base};
+}
+function calc(){
+  const ok=valid(),r=repay(),inst=s.mode==='inst';
+  $('#dv').textContent=s.days+' дн.';
+  count($('#tot'),ok?r.total/V[s.cur]:0,x=>ok?fmt(x)+' '+L[s.cur]:'—');
+  $('#tot2').textContent=ok&&s.cur!=='GRAM'?'≈ '+nf(r.total)+' GRAM':'';
+  const rows=[['Сумма кредита',ok?m(r.g):'—'],['Срок',s.days+' дн.'],['Ставка на '+s.days+'-й день',nf(r.rate,1)+'%'],['Начислено',ok?m(r.acc):'—']];
+  if(inst)rows.push(['Платёж в день ('+s.days+' шт.)',ok?m(r.daily):'—'],['Надбавка +'+C.instFee+'% к платежу',ok?m(r.fee):'—']);
+  $('#rows').innerHTML=rows.map(a=>'<div><dt>'+a[0]+'</dt><dd>'+a[1]+'</dd></div>').join('');
+  $('#schc').hidden=!(ok&&inst);
+  if(ok&&inst){let left=r.total,h='';for(let i=1;i<=s.days;i++){left=i===s.days?0:left-r.daily;h+='<div><span>День '+i+'</span><b>'+m(r.daily)+'</b><small>остаток '+fmt(left/V[s.cur])+'</small></div>'}$('#sch').innerHTML=h}
+  $$('#lad div').forEach((d,i)=>d.classList.toggle('on',s.days===i+1));
+}
+function chips(){
+  const base=[7000,15000,35000,70000];
+  $('#chips').innerHTML=base.map(g=>{const v=s.cur==='GRAM'?g:Math.ceil(g/V[s.cur]/1000-1e-9)*1000;return '<button class="chip" data-v="'+v+'">'+nf(v)+'</button>'}).join('');
+  $$('.chip').forEach(c=>c.onclick=()=>{s.amt=+c.dataset.v;inp.value=nf(s.amt,0);check();calc()});
+}
+inp.oninput=()=>{const d=inp.value.replace(/\D/g,'').slice(0,10);s.amt=d?+d:0;inp.value=d?nf(s.amt,0):'';check();calc()};
+$$('#cur button').forEach(b=>b.onclick=()=>{
+  if(b.dataset.c===s.cur)return;const g=gram();s.cur=b.dataset.c;
+  $$('#cur button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#cu').textContent=L[s.cur];if(s.amt){s.amt=Math.round(g/V[s.cur]);inp.value=nf(s.amt,0)}
+  chips();check();calc();
+});
+$('#days').oninput=e=>{s.days=+e.target.value;calc()};
+$$('#mode button').forEach(b=>b.onclick=()=>{
+  s.mode=b.dataset.m;const d=$('#days');
+  d.min=s.mode==='inst'?2:1;d.max=s.mode==='inst'?C.instMaxDays:C.maxDays;
+  s.days=Math.min(Math.max(s.days,+d.min),+d.max);d.value=s.days;
+  $('#dl').textContent=s.mode==='inst'?'Срок рассрочки (макс. '+C.instMaxDays+' дн.)':'Срок';
+  $$('#mode button').forEach(x=>x.classList.toggle('on',x===b));calc();
+  if(s.mode==='inst')toast('Рассрочка: ежедневные платежи, +'+C.instFee+'% к каждому');
+});
+$('#lad').innerHTML=[1,2,3,4].map(d=>'<div><small>День '+d+'</small><b>'+nf(rateFor(d),1)+'%</b></div>').join('');
+$('#mode button[data-m=inst]').textContent='Рассрочка до '+C.instMaxDays+' дн.';
+
+/* ---------- залог ---------- */
+const COL={usd:['USD','USD','Доллары'],crypto:['Крипта','USDT','В эквиваленте USDT'],stars:['Telegram Stars','STAR','Звёзды'],gifts:['Telegram Gifts','STAR','В эквиваленте Stars'],nft:['NFT','STAR','В эквиваленте Stars']};
+$('#opts').innerHTML=Object.keys(COL).map(k=>'<button class="opt" data-k="'+k+'"><div><b>'+COL[k][0]+'</b><small>'+COL[k][2]+'</small></div><i></i></button>').join('');
+const show=id=>{['s1','s2','s3'].forEach(x=>$('#'+x).hidden=x!==id);scrollTo(0,0)};
+function pledge(){
+  if(!s.col)return;const g=gram(),tot=g*(1+C.margin/100),[n,u]=COL[s.col];
+  $('#pl').hidden=false;
+  count($('#ptot'),tot/V[u],x=>fmt(x)+' '+L[u]);
+  $('#prow').innerHTML=[['Кредит',nf(g)+' GRAM'],['Запас залога +'+C.margin+'%',nf(tot-g)+' GRAM'],['Необходимый залог',nf(tot)+' GRAM'],['Тип залога',n]].map(a=>'<div><dt>'+a[0]+'</dt><dd>'+a[1]+'</dd></div>').join('');
+  $('#prate').textContent='Курс залога: 1 Star = '+nf(V.STAR)+' GRAM · 1 USD = '+nf(V.USD/V.STAR)+' Stars';
+  $('#ok').disabled=false;
+}
+$$('.opt').forEach(o=>o.onclick=()=>{s.col=o.dataset.k;$$('.opt').forEach(x=>x.classList.toggle('on',x===o));pledge()});
+$('#go').onclick=()=>{if(!check(true)){inp.focus();toast('Проверьте сумму кредита');return}$('#opn').textContent=opNo;show('s2');pledge()};
+$('#back').onclick=()=>show('s1');
+
+/* ---------- подтверждение → личные сообщения ---------- */
+function message(op){
+  const r=repay(),[cn,cu]=COL[s.col],need=r.g*(1+C.margin/100);
+  return['🏦 Заявка на кредит — GRAM Bank','','Операция №'+op,'ID пользователя: '+uidText,'',
+   'Сумма кредита: '+m(r.g)+(s.cur!=='GRAM'?' (= '+nf(r.g)+' GRAM)':''),
+   'Срок: '+s.days+' дн.','Ставка: '+nf(r.rate,1)+'% (на '+s.days+'-й день)',
+   'Погашение: '+(s.mode==='inst'?'рассрочка, '+s.days+' платежей по '+m(r.daily)+' (+'+C.instFee+'% к платежу)':'единовременно'),
+   'Начислено: '+m(r.acc),'К возврату: '+m(r.total),'',
+   'Залог: '+cn+' — '+fmt(need/V[cu])+' '+L[cu]+' (= '+nf(need)+' GRAM, запас +'+C.margin+'%)','',
+   'Дата: '+new Date().toLocaleString('ru-RU')].join('\n');
+}
+const openChat=u=>{if(tg&&tg.openTelegramLink)tg.openTelegramLink(u);else window.open(u,'_blank')};
+$('#ok').onclick=()=>{
+  s.link='https://t.me/'+A.support+'?text='+encodeURIComponent(message(opNo));
+  openChat(s.link);saveOp(opNo+1);show('s3');
+};
+$('#again').onclick=()=>openChat(s.link);
+$('#fin').onclick=()=>{s.col=null;s.amt=0;inp.value='';$$('.opt').forEach(x=>x.classList.remove('on'));$('#pl').hidden=true;$('#ok').disabled=true;check();calc();show('s1');toast('Готово. Заявка отправляется в чате')};
+
+/* ---------- условия ---------- */
+$('#terms').innerHTML=[['Минимальный кредит',nf(C.min)+' GRAM'],['Ставка',nf(C.startRate,1)+'% в 1-й день, затем +'+C.rateStep+'% в день'],['Запас залога','не менее +'+C.margin+'% к кредиту'],['Рассрочка','до '+C.instMaxDays+' дн., +'+C.instFee+'% к платежу'],['PR GRAM','1 PR GRAM = '+V.PRGRAM+' GRAM'],['Telegram Star','1 Star = '+nf(V.STAR)+' GRAM'],['USD / USDT','1 USD = '+nf(V.USD/V.STAR)+' Stars'],['RDNO','1 RDNO = '+V.RDNO+' GRAM']]
+ .map((a,i)=>'<div class="term" style="animation-delay:'+i*.04+'s"><small>'+a[0]+'</small><b>'+a[1]+'</b></div>').join('');
+
+/* ---------- калькулятор и курсы ---------- */
+const keys=Object.keys(V),opts=keys.map(k=>'<option value="'+k+'">'+L[k]+'</option>').join('');
+$('#cf').innerHTML=opts;$('#ct').innerHTML=opts;$('#cf').value='GRAM';$('#ct').value='USD';
+function exch(){
+  const x=parseFloat($('#cv').value.replace(',','.').replace(/\s/g,''))||0,f=$('#cf').value,t=$('#ct').value;
+  $('#cr').textContent=fmt(x*V[f]/V[t]);
+  $('#cn').textContent='1 '+L[f]+' = '+fmt(V[f]/V[t])+' '+L[t];
+}
+['#cv','#cf','#ct'].forEach(i=>$(i).oninput=exch);
+$('#cs').onclick=()=>{const f=$('#cf'),t=$('#ct'),v=f.value;f.value=t.value;t.value=v;$('#cs').style.transform='rotate('+((+$('#cs').dataset.r||0)+180)+'deg)';$('#cs').dataset.r=(+$('#cs').dataset.r||0)+180;exch()};
+$('#rates').innerHTML=keys.filter(k=>k!=='GRAM').map(k=>'<div><dt>1 '+L[k]+'</dt><dd>'+fmt(V[k])+' GRAM</dd></div>').join('');
+$('#shp').textContent='Цена: '+nf(A.share.price)+' GRAM ≈ '+fmt(A.share.price/V.STAR)+' Star. Продажа не открыта.';
+exch();
+
+/* ---------- графики (демо-данные) ---------- */
+const CH={
+  gram:{t:'GRAM · курс (GRAM за 1 Star)',seed:42,base:V.STAR,vol:A.vol.GRAM/100,rev:.92},
+  pr:{t:'PR GRAM · курс (PR GRAM за 1 Star)',seed:77,base:V.STAR/V.PRGRAM,vol:A.vol.PRGRAM/100,rev:.94,wave:.06},
+  shares:{t:'GRAMBANK · потенциальная цена акции, GRAM (прогноз)',seed:9,base:A.share.price,vol:A.share.volatility/100,drift:Math.log(1+A.share.growthPerYear/100)/365}
+};
+const PER={'7D':7,'1M':30,'3M':90,'1Y':365},cache={};
+function series(k){
+  if(cache[k])return cache[k];const c=CH[k];let sd=c.seed;const r=()=>(sd=sd*16807%2147483647)/2147483647;let v=c.base;const o=[];
+  for(let i=0;i<365;i++){
+    if(c.drift)v*=1+c.drift+(r()-.5)*c.vol;
+    else{const mid=c.base*(1+(c.wave||0)*Math.sin(i/17));v=mid+(v-mid)*c.rev+(r()-.5)*c.vol*c.base}
+    o.push(v);
+  }
+  return cache[k]=o;
+}
+$$('.chart').forEach(el=>{
+  const k=el.dataset.k;let p='1M';
+  el.innerHTML='<div class="ch-h"><div><small>'+CH[k].t+'</small><div class="ch-v"></div></div><b class="chg"></b></div><div class="svg"></div><div class="mm"><span></span><span></span></div><div class="per">'+Object.keys(PER).map(x=>'<button data-p="'+x+'">'+x+'</button>').join('')+'</div><p class="note">Демонстрационные данные'+(k==='shares'?' · прогноз, не гарантия':'')+'</p>';
+  const draw=()=>{
+    const all=series(k),n=PER[p],d=k==='shares'?all.slice(0,n):all.slice(-n);
+    const mn=Math.min(...d),mx=Math.max(...d),pad=(mx-mn)*.15||1,lo=mn-pad,hi=mx+pad;
+    const pts=d.map((v,i)=>(i/(d.length-1)*300).toFixed(1)+' '+(120-(v-lo)/(hi-lo)*120).toFixed(1));
+    const path='M'+pts.join('L');
+    $('.svg',el).innerHTML='<svg viewBox="0 0 300 120" preserveAspectRatio="none"><path class="area" d="'+path+'L300 120L0 120Z"/><path class="line" pathLength="1" d="'+path+'"/></svg>';
+    const last=d[d.length-1],chg=(last/d[0]-1)*100;
+    $('.ch-v',el).textContent=nf(last,1);
+    const c=$('.chg',el);c.textContent=(chg>=0?'+':'')+nf(chg,2)+'%';c.className='chg '+(chg>=0?'up':'dn');
+    const sp=$$('.mm span',el);sp[0].textContent='мин. '+nf(mn,1);sp[1].textContent='макс. '+nf(mx,1);
+    $$('.per button',el).forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  };
+  $$('.per button',el).forEach(b=>b.onclick=()=>{p=b.dataset.p;draw()});draw();
+});
+
+chips();check();calc();
+})();
+</script>
+</body>
+</html>
